@@ -1,0 +1,17 @@
+{
+  "name": "algoTradingBot",
+  "version": "1.0.0",
+  "description": "a algo trading bot ",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "bun --hot server.js"
+  },
+  "author": "pravesh",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "fyers-api-v3": "^1.2.1",
+    "nodemon": "^3.1.3"
+  }
+}
