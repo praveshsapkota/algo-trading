@@ -1,0 +1,143 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: timescale/timescaledb:latest-pg14
+    container_name: algo-trading-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: algo_trading
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: algo-trading-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  market-data:
+    build:
+      context: .
+      dockerfile: deployments/docker/market-data.Dockerfile
+    container_name: algo-trading-market-data
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./configs/.env
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  signal-generator:
+    build:
+      context: .
+      dockerfile: deployments/docker/signal-generator.Dockerfile
+    container_name: algo-trading-signal-generator
+    ports:
+      - "8002:8002"
+    env_file:
+      - ./configs/.env
+    depends_on:
+      - postgres
+      - redis
+      - market-data
+    restart: unless-stopped
+
+  risk-manager:
+    build:
+      context: .
+      dockerfile: deployments/docker/risk-manager.Dockerfile
+    container_name: algo-trading-risk-manager
+    ports:
+      - "8004:8004"
+    env_file:
+      - ./configs/.env
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  trade-executor:
+    build:
+      context: .
+      dockerfile: deployments/docker/trade-executor.Dockerfile
+    container_name: algo-trading-trade-executor
+    ports:
+      - "8003:8003"
+    env_file:
+      - ./configs/.env
+    depends_on:
+      - postgres
+      - redis
+      - risk-manager
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: deployments/docker/dashboard.Dockerfile
+    container_name: algo-trading-dashboard
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./configs/.env
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: algo-trading-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./deployments/prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: algo-trading-grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./deployments/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
