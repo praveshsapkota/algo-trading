@@ -14,6 +14,8 @@ The system is built using a microservices architecture with the following compon
 6. **Order Executor**: Handles order placement and execution.
 7. **Trade Repository**: Stores trade information in PostgreSQL.
 8. **Dashboard Service**: Provides a web interface for monitoring and analysis.
+9. **Backtester Service**: Allows testing of trading strategies against historical data.
+10. **Options Trading**: Supports trading of options contracts with pricing models.
 
 ## Technology Stack
 
@@ -65,7 +67,8 @@ algo-trading/
 │   ├── signal-generator/   # Signal generation service
 │   ├── trade-executor/     # Trade execution service
 │   ├── risk-manager/       # Risk management service
-│   └── dashboard/          # Dashboard service
+│   ├── dashboard/          # Dashboard service
+│   └── backtester/         # Backtesting service
 ├── pkg/                    # Shared packages
 │   ├── models/             # Data models
 │   ├── database/           # Database access
@@ -73,13 +76,15 @@ algo-trading/
 │   ├── strategy/           # Trading strategies
 │   ├── indicators/         # Technical indicators
 │   ├── risk/               # Risk management
+│   ├── options/            # Options pricing and models
 │   └── utils/              # Utility functions
 ├── internal/               # Internal packages
 │   ├── market-data/        # Market data implementation
 │   ├── signal-generator/   # Signal generation implementation
 │   ├── trade-executor/     # Trade execution implementation
 │   ├── risk-manager/       # Risk management implementation
-│   └── dashboard/          # Dashboard implementation
+│   ├── dashboard/          # Dashboard implementation
+│   └── backtester/         # Backtesting implementation
 ├── api/                    # API definitions
 │   ├── proto/              # Protocol buffers
 │   └── rest/               # REST API specs
@@ -112,6 +117,10 @@ go run main.go
 # Dashboard
 cd cmd/dashboard
 go run main.go
+
+# Backtester
+cd cmd/backtester
+go run main.go
 ```
 
 ### Testing
@@ -119,6 +128,42 @@ go run main.go
 ```bash
 go test ./...
 ```
+
+## Features
+
+### Backtesting
+
+The backtesting module allows you to test trading strategies against historical data:
+
+- Test strategies with different parameters and timeframes
+- Analyze performance metrics (returns, drawdowns, Sharpe ratio)
+- Visualize equity curves and trade distributions
+- Compare multiple strategies side by side
+- Export results for further analysis
+
+To use the backtester:
+
+1. Navigate to the Backtester page in the dashboard
+2. Select a strategy and configure parameters
+3. Choose symbols and date range
+4. Run the backtest and analyze results
+
+### Options Trading
+
+The options trading module supports basic options trading with:
+
+- Options chain data visualization
+- Black-Scholes pricing model
+- Greeks calculation (Delta, Gamma, Theta, Vega)
+- Basic options strategies (calls and puts)
+- Position tracking and P&L calculation
+
+To use options trading:
+
+1. Navigate to the Options Trading page in the dashboard
+2. View options chains for selected symbols
+3. Use the options calculator to price contracts
+4. Track open positions and P&L
 
 ## License
 
