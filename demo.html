@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algo Trading Platform Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0a1929;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        .navbar {
+            background-color: #1e1e1e;
+        }
+        .sidebar {
+            background-color: #1e1e1e;
+            height: calc(100vh - 56px);
+            position: fixed;
+            width: 240px;
+            padding-top: 20px;
+        }
+        .sidebar .nav-link {
+            color: #ccc;
+            padding: 10px 20px;
+        }
+        .sidebar .nav-link.active {
+            background-color: #2c2c2c;
+            color: #90caf9;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #2c2c2c;
+        }
+        .main-content {
+            margin-left: 240px;
+            padding: 20px;
+        }
+        .card {
+            background-color: #1e1e1e;
+            border: none;
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #2c2c2c;
+            color: #fff;
+            font-weight: bold;
+        }
+        .tab-content {
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 0 0 5px 5px;
+        }
+        .nav-tabs .nav-link {
+            color: #ccc;
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #1e1e1e;
+            color: #90caf9;
+            border-color: #2c2c2c #2c2c2c #1e1e1e;
+        }
+        .table {
+            color: #ccc;
+        }
+        .table thead th {
+            border-bottom-color: #2c2c2c;
+        }
+        .table td, .table th {
+            border-top-color: #2c2c2c;
+        }
+        .stats-card {
+            background-color: #2c2c2c;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .stats-card h5 {
+            color: #90caf9;
+            margin-bottom: 10px;
+        }
+        .stats-card h3 {
+            margin-bottom: 0;
+        }
+        .positive {
+            color: #4caf50;
+        }
+        .negative {
+            color: #f44336;
+        }
+        .chart-container {
+            background-color: #2c2c2c;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Algo Trading Platform</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="bi bi-bell"></i> Notifications</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="bi bi-person-circle"></i> Profile</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="#dashboard">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#trades">Trades</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#signals">Signals</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#performance">Performance</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="#backtester">Backtester</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#options">Options Trading</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#settings">Settings</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div id="backtester-content">
+            <h2 class="mb-4">Strategy Backtester</h2>
+            
+            <div class="row">
+                <!-- Backtest Parameters -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">Parameters</div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="strategy" class="form-label">Strategy</label>
+                                <select class="form-select" id="strategy">
+                                    <option>Moving Average Crossover</option>
+                                    <option>RSI Oscillator</option>
+                                    <option>MACD Divergence</option>
+                                    <option>Bollinger Bands</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="symbols" class="form-label">Symbols</label>
+                                <input type="text" class="form-control" id="symbols" value="AAPL, MSFT, GOOGL">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="timeframe" class="form-label">Timeframe</label>
+                                <select class="form-select" id="timeframe">
+                                    <option>1 Minute</option>
+                                    <option>5 Minutes</option>
+                                    <option>15 Minutes</option>
+                                    <option>1 Hour</option>
+                                    <option selected>1 Day</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="start-date" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="start-date" value="2024-01-01">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="end-date" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="end-date" value="2024-04-01">
+                            </div>
+                            
+                            <button class="btn btn-primary w-100">Run Backtest</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Results -->
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h5>Total Return</h5>
+                                <h3 class="positive">+12.45%</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h5>Win Rate</h5>
+                                <h3>68.2%</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h5>Max Drawdown</h5>
+                                <h3 class="negative">-5.8%</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h5>Sharpe Ratio</h5>
+                                <h3>1.85</h3>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Equity Curve -->
+                    <div class="chart-container">
+                        <h5>Equity Curve</h5>
+                        <div style="height: 250px; display: flex; align-items: center; justify-content: center;">
+                            <img src="https://www.investopedia.com/thmb/P3ElO2K0diRKdvjl6XgEYhW2TMc=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/dotdash_Final_Equity_Curve_Sep_2020-01-58e7922fc6b3438c9319e8da717c4a7b.jpg" alt="Equity Curve" style="max-width: 100%; max-height: 230px;">
+                        </div>
+                    </div>
+                    
+                    <!-- Drawdown Chart -->
+                    <div class="chart-container">
+                        <h5>Drawdown</h5>
+                        <div style="height: 250px; display: flex; align-items: center; justify-content: center;">
+                            <img src="https://www.investopedia.com/thmb/PN2ypECQjkL-ySFIn7Y4QdKlZQQ=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/dotdash_Final_Maximum_Drawdown_Sep_2020-01-c6d9f4b183a34198aa5b1d4c26a90f1a.jpg" alt="Drawdown Chart" style="max-width: 100%; max-height: 230px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="options-content" style="display: none;">
+            <h2 class="mb-4">Options Trading</h2>
+            
+            <ul class="nav nav-tabs mb-3">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#option-chain">Option Chain</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#positions">My Positions</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#calculator">Option Calculator</a>
+                </li>
+            </ul>
+            
+            <div class="tab-content">
+                <!-- Option Chain Tab -->
+                <div class="tab-pane fade show active" id="option-chain">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" placeholder="Symbol" value="AAPL">
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select">
+                                <option>Apr 19, 2024</option>
+                                <option>May 17, 2024</option>
+                                <option>Jun 21, 2024</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <h5 class="text-end">AAPL: $175.25</h5>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Calls -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">Calls</div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Strike</th>
+                                                    <th>Bid</th>
+                                                    <th>Ask</th>
+                                                    <th>Last</th>
+                                                    <th>IV</th>
+                                                    <th>Volume</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>170.00</td>
+                                                    <td>6.25</td>
+                                                    <td>6.45</td>
+                                                    <td>6.35</td>
+                                                    <td>28.5%</td>
+                                                    <td>1,245</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>172.50</td>
+                                                    <td>4.55</td>
+                                                    <td>4.75</td>
+                                                    <td>4.65</td>
+                                                    <td>27.8%</td>
+                                                    <td>987</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>175.00</td>
+                                                    <td>3.15</td>
+                                                    <td>3.35</td>
+                                                    <td>3.25</td>
+                                                    <td>26.9%</td>
+                                                    <td>2,341</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>177.50</td>
+                                                    <td>2.05</td>
+                                                    <td>2.25</td>
+                                                    <td>2.15</td>
+                                                    <td>26.2%</td>
+                                                    <td>1,567</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>180.00</td>
+                                                    <td>1.25</td>
+                                                    <td>1.45</td>
+                                                    <td>1.35</td>
+                                                    <td>25.8%</td>
+                                                    <td>2,789</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Puts -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">Puts</div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Strike</th>
+                                                    <th>Bid</th>
+                                                    <th>Ask</th>
+                                                    <th>Last</th>
+                                                    <th>IV</th>
+                                                    <th>Volume</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>170.00</td>
+                                                    <td>1.15</td>
+                                                    <td>1.35</td>
+                                                    <td>1.25</td>
+                                                    <td>29.5%</td>
+                                                    <td>876</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>172.50</td>
+                                                    <td>1.85</td>
+                                                    <td>2.05</td>
+                                                    <td>1.95</td>
+                                                    <td>28.8%</td>
+                                                    <td>654</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>175.00</td>
+                                                    <td>2.85</td>
+                                                    <td>3.05</td>
+                                                    <td>2.95</td>
+                                                    <td>27.9%</td>
+                                                    <td>1,432</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>177.50</td>
+                                                    <td>4.15</td>
+                                                    <td>4.35</td>
+                                                    <td>4.25</td>
+                                                    <td>27.2%</td>
+                                                    <td>987</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>180.00</td>
+                                                    <td>5.75</td>
+                                                    <td>5.95</td>
+                                                    <td>5.85</td>
+                                                    <td>26.8%</td>
+                                                    <td>765</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Positions Tab -->
+                <div class="tab-pane fade" id="positions">
+                    <div class="card">
+                        <div class="card-header">Open Positions</div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Symbol</th>
+                                            <th>Type</th>
+                                            <th>Strike</th>
+                                            <th>Expiration</th>
+                                            <th>Quantity</th>
+                                            <th>Avg Price</th>
+                                            <th>Current</th>
+                                            <th>P&L</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>AAPL</td>
+                                            <td>CALL</td>
+                                            <td>$175.00</td>
+                                            <td>Apr 19, 2024</td>
+                                            <td>2</td>
+                                            <td>$2.85</td>
+                                            <td>$3.25</td>
+                                            <td class="positive">$80.00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>MSFT</td>
+                                            <td>PUT</td>
+                                            <td>$410.00</td>
+                                            <td>Apr 19, 2024</td>
+                                            <td>1</td>
+                                            <td>$4.75</td>
+                                            <td>$3.95</td>
+                                            <td class="negative">-$80.00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>GOOGL</td>
+                                            <td>CALL</td>
+                                            <td>$150.00</td>
+                                            <td>May 17, 2024</td>
+                                            <td>3</td>
+                                            <td>$5.25</td>
+                                            <td>$6.15</td>
+                                            <td class="positive">$270.00</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Calculator Tab -->
+                <div class="tab-pane fade" id="calculator">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">Option Price Calculator</div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Option Type</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="optionType" id="callOption" checked>
+                                            <label class="form-check-label" for="callOption">Call</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="optionType" id="putOption">
+                                            <label class="form-check-label" for="putOption">Put</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="underlyingPrice" class="form-label">Underlying Price</label>
+                                        <input type="number" class="form-control" id="underlyingPrice" value="175.25">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="strikePrice" class="form-label">Strike Price</label>
+                                        <input type="number" class="form-control" id="strikePrice" value="175.00">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="expirationDate" class="form-label">Expiration Date</label>
+                                        <input type="date" class="form-control" id="expirationDate" value="2024-04-19">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="volatility" class="form-label">Implied Volatility: 27%</label>
+                                        <input type="range" class="form-range" id="volatility" min="5" max="100" value="27">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="riskFreeRate" class="form-label">Risk-Free Rate: 3%</label>
+                                        <input type="range" class="form-range" id="riskFreeRate" min="0" max="10" value="3">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">Results</div>
+                                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                    <h5 class="text-center mb-4">Theoretical Price</h5>
+                                    <h2 class="text-center text-primary mb-5">$3.27</h2>
+                                    
+                                    <div class="w-100">
+                                        <h5 class="mb-3">Greeks:</h5>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <p>Delta: +0.52</p>
+                                            </div>
+                                            <div class="col-6">
+                                                <p>Gamma: 0.04</p>
+                                            </div>
+                                            <div class="col-6">
+                                                <p>Theta: -0.03</p>
+                                            </div>
+                                            <div class="col-6">
+                                                <p>Vega: 0.11</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simple navigation
+        document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Update active link
+                document.querySelectorAll('.sidebar .nav-link').forEach(l => {
+                    l.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Show appropriate content
+                const target = this.getAttribute('href').substring(1);
+                
+                if (target === 'backtester') {
+                    document.getElementById('backtester-content').style.display = 'block';
+                    document.getElementById('options-content').style.display = 'none';
+                } else if (target === 'options') {
+                    document.getElementById('backtester-content').style.display = 'none';
+                    document.getElementById('options-content').style.display = 'block';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
